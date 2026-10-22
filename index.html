@@ -145,7 +145,7 @@ footer{color:var(--soft);font-size:.8rem;margin-top:20px}
 <h2>決めること</h2>
 <div class="tour"><div class="m">・マーケットとモールの希望（minta さんに確認中）／・遠出は①②③のどれか、なしか／・11/7 の荷物（宿に預けて取りに戻るか、会場に持ち込むか）／・ETHGlobal の日付と会場</div></div>
 
-<footer>休館日：エローラ＝火、アジャンタ＝月、エレファンタ島・カーンヘリ＝月。距離と所要時間は概算。</footer>
+<footer>休館日：エローラ＝火、アジャンタ＝月、カーンヘリ＝月。距離と所要時間は概算。</footer>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
@@ -156,14 +156,10 @@ var W=function(t){return 'https://en.wikipedia.org/wiki/'+t};
 var SP={
  airport:{n:'ムンバイ空港',la:19.0896,lo:72.8656,m:'到着 10/31 23:10 ／ 出発 11/7 22:55'},
  bkc:{n:'Jio World Centre（BKC）',la:19.0645,lo:72.8681,m:'Devcon 8 会場。宿は BKC 周辺'},
- gateway:{n:'ゲートウェイ・オブ・インディア',la:18.9220,lo:72.8347,m:'南端コラバ。BKC から車 1〜1.5h',w:'Gateway_of_India'},
  colaba:{n:'コラバ・コーズウェイ',la:18.9186,lo:72.8318,q:'Colaba Causeway Mumbai',m:'路上市場とカフェ。夜まで賑やか。日曜も開いている'},
  carter:{n:'カーター・ロード（バンドラ）',la:19.0690,lo:72.8230,q:'Carter Road Bandra Mumbai',m:'海沿いの散歩道。カフェが多い。BKC から車 20〜40分（概算）'},
  bandstand:{n:'バンドスタンド（バンドラ）',la:19.0447,lo:72.8213,q:'Bandstand Promenade Bandra Mumbai',m:'遊歩道と屋台。若者が集まる'},
- marine:{n:'マリン・ドライブ',la:18.9440,lo:72.8231,m:'南の海沿い。夕方向き',w:'Marine_Drive,_Mumbai'},
- csmt:{n:'CSMT 駅',la:18.9398,lo:72.8355,m:'フォート地区。ゴシック建築',w:'Chhatrapati_Shivaji_Maharaj_Terminus'},
  crawford:{n:'クロフォード・マーケット',la:18.9473,lo:72.8340,m:'フォート地区の市場',w:'Crawford_Market'},
- elephanta:{n:'エレファンタ島',la:18.9633,lo:72.9315,m:'ゲートウェイから船で約1h。月曜休み',w:'Elephanta_Caves'},
  kanheri:{n:'カーンヘリ石窟',la:19.2058,lo:72.9068,m:'北の国立公園内。月曜休み',w:'Kanheri_Caves'},
  matheran:{n:'マテラン',la:18.9867,lo:73.2672,m:'車なしの山の町。トイトレイン',w:'Matheran'},
  alibag:{n:'アリバーグ',la:18.6414,lo:72.8722,m:'船で渡る海辺',w:'Alibag'},
@@ -174,15 +170,15 @@ var SP={
  bibi:{n:'ビービー・カ・マクバラ',la:19.9017,lo:75.3205,m:'「ミニ・タージ」。アウランガバード市内',w:'Bibi_Ka_Maqbara'}
 };
 var VIEWS=[
- {k:'south',t:'南ムンバイ',b:[18.905,18.975,72.805,72.945],ids:['gateway','csmt','colaba','crawford','elephanta'],km:2},
+ {k:'south',t:'南ムンバイ',b:[18.910,18.955,72.805,72.860],ids:['colaba','crawford'],km:1},
  {k:'around',t:'ムンバイ周辺',b:[18.60,19.25,72.75,73.55],ids:['airport','bkc','carter','bandstand','kanheri','alibag','matheran','karla'],km:20},
  {k:'ellora',t:'エローラ日帰り',b:[18.85,20.70,72.60,75.90],ids:['ellora','kailasa','ajanta','bibi'],km:100,extra:[{n:'ムンバイ',la:19.0645,lo:72.8681}]}
 ];
 var DAYS=[
  {d:'10/31（土）',t:'着',h:'23:10 ムンバイ着',p:'深夜着。空港から BKC 周辺の宿へ（Uber / Ola）。',s:['airport','bkc']},
- {d:'11/1（日）',t:'市内',h:'南ムンバイ街歩き → 夜はコラバ・コーズウェイ',p:'ゲートウェイ → CSMT 駅 → コラバ・コーズウェイ。クロフォード・マーケットは日曜休みなので入れない。',s:['gateway','csmt','colaba']},
- {d:'11/2（月）',t:'日帰り',h:'クロフォード・マーケット → 近郊の日帰り',p:'月曜はエレファンタ島とカーンヘリが休み。近郊はアリバーグかマテラン。',s:['crawford','alibag','matheran']},
- {d:'11/3（火）',t:'島',h:'エレファンタ島',p:'火曜は開館。ゲートウェイから船で往復。',s:['gateway','elephanta']},
+ {d:'11/1（日）',t:'市内',h:'コラバ・コーズウェイ（夜まで）',p:'日曜は Crawford Market が休みなので、路上市場へ。',s:['colaba']},
+ {d:'11/2（月）',t:'日帰り',h:'クロフォード・マーケット → 近郊の日帰り',p:'近郊はアリバーグかマテラン。',s:['crawford','alibag','matheran']},
+ {d:'11/3（火）',t:'未定',h:'予定なし',p:'遠出①（アウランガバード1泊）を選ぶなら、この日にアジャンタ。',s:[]},
  {d:'11/4（水）',t:'日帰り',h:'エローラ（＋アジャンタ）日帰りツアー',p:'火曜休みのエローラ、月曜休みのアジャンタ、どちらも水曜は開館。',s:['ellora','ajanta','bibi']},
  {d:'11/5（木）',t:'Devcon',h:'Devcon 8 にふらっと → 夜はバンドラ',p:'BKC。ETHGlobal の前日。夜はカーター・ロードとバンドスタンド（車で移動）。',s:['bkc','carter','bandstand']},
  {d:'11/6（金）',t:'ハック',h:'ETHGlobal 開始（深夜は宿に戻って寝る）',p:'日付は要確認。',s:['bkc']},
