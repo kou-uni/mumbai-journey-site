@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+<title>Mumbai Journey</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@600;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap">
+<style>
+/* Layout: 地図を上、日ごとの旅程、観光地ガイド、ツアーの順。縦一列、スマホ前提。 */
+:root{
+  --bg:#f2f5f3;--card:#ffffff;--ink:#14232a;--soft:#53656b;--line:#d6dfdc;
+  --sea:#0f5c63;--sea-soft:#dcecea;--gold:#e8890c;--gold-ink:#14232a;--map:#e6eeec;--grid:#cfdad7;
+  --head:"Shippori Mincho","Hiragino Mincho ProN",serif;
+  --body:"Zen Kaku Gothic New","Hiragino Sans",-apple-system,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0d1a1d;--card:#15262a;--ink:#e8f0ee;--soft:#98adb1;--line:#27393d;
+  --sea:#5cc4c9;--sea-soft:#183a3d;--gold:#f2a33a;--gold-ink:#14232a;--map:#112226;--grid:#1d3236;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0d1a1d;--card:#15262a;--ink:#e8f0ee;--soft:#98adb1;--line:#27393d;
+  --sea:#5cc4c9;--sea-soft:#183a3d;--gold:#f2a33a;--gold-ink:#14232a;--map:#112226;--grid:#1d3236;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:16px/1.7 var(--body);
+  padding-block:20px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
+h1{font:700 1.7rem/1.25 var(--head);margin:0;text-wrap:balance}
+h2{font:700 1.2rem/1.3 var(--head);margin:28px 0 4px;color:var(--sea)}
+.sub{color:var(--soft);margin:2px 0 0;font-size:.92rem}
+.note{border-left:4px solid var(--gold);background:var(--sea-soft);padding:10px 14px;border-radius:4px;font-size:.9rem}
+a{color:var(--sea)}
+.tabs{display:flex;gap:8px;flex-wrap:wrap}
+.tabs button{font:inherit;font-size:.9rem;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:6px 14px;cursor:pointer}
+.tabs button[aria-pressed="true"]{background:var(--sea);border-color:var(--sea);color:var(--bg)}
+.tabs button:focus-visible,.pin:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.mapbox{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--map)}
+.mapbox svg{display:block;width:100%;height:auto}
+.mapcap{font-size:.8rem;color:var(--soft);margin:0}
+.pin{cursor:pointer}
+.pin circle{fill:var(--gold);stroke:var(--gold-ink);stroke-width:1.5}
+.pin text{font:700 11px var(--body);fill:var(--gold-ink);text-anchor:middle;dominant-baseline:central;pointer-events:none}
+.pin.on circle{fill:var(--sea);stroke:var(--bg);stroke-width:2.5}
+.pin.on text{fill:var(--bg)}
+.grid line{stroke:var(--grid);stroke-width:1}
+.scale line{stroke:var(--ink);stroke-width:2}
+.scale text,.north{font:500 11px var(--body);fill:var(--soft)}
+.sel{background:var(--card);border:1px solid var(--sea);border-radius:10px;padding:10px 14px}
+.sel b{display:block}
+.sel .m{color:var(--soft);font-size:.88rem}
+.sel .links{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
+.sel .links a{border:1px solid var(--sea);border-radius:999px;padding:4px 14px;text-decoration:none;font-size:.9rem;font-weight:500}
+#lmap{height:380px;border-radius:10px;border:1px solid var(--line)}
+.bdg{width:26px;height:26px;border-radius:50%;background:var(--gold);color:var(--gold-ink);border:2px solid var(--gold-ink);display:grid;place-items:center;font:700 12px var(--body)}
+.bdg.on{background:var(--sea);color:var(--bg);border-color:var(--bg)}
+.sel iframe{width:100%;height:240px;border:0;border-radius:8px;margin-top:10px}
+.list{display:flex;flex-direction:column;gap:8px;margin:0;padding:0;list-style:none}
+.item{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 14px;display:grid;grid-template-columns:28px minmax(0,1fr);gap:4px 10px}
+.item.on{border-color:var(--sea);box-shadow:0 0 0 2px var(--sea-soft)}
+.num{width:26px;height:26px;border-radius:50%;background:var(--gold);color:var(--gold-ink);font-weight:700;font-size:.85rem;display:grid;place-items:center}
+.item b{font-weight:700}
+.item .m{color:var(--soft);font-size:.88rem}
+.links{grid-column:2;display:flex;gap:14px;flex-wrap:wrap;font-size:.9rem}
+.day{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.day h3{margin:0;font-size:.95rem;font-weight:700;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+.tag{font-size:.72rem;font-weight:500;background:var(--sea-soft);color:var(--sea);border-radius:5px;padding:1px 8px}
+.day .h{margin:2px 0 0;font-weight:500}
+.day .p{margin:2px 0 0;color:var(--soft);font-size:.88rem}
+.day .s{margin:6px 0 0;font-size:.88rem;display:flex;flex-wrap:wrap;gap:4px 12px}
+.tour{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.tour b{display:block}
+.tour .m{color:var(--soft);font-size:.88rem}
+footer{color:var(--soft);font-size:.8rem;margin-top:20px}
+</style>
+</head>
+<body>
+
+
+<div class="wrap">
+<header>
+  <h1>Mumbai Journey</h1>
+  <p class="sub">10/31(土) 23:10 ムンバイ着 → 11/7(土) 22:55 ムンバイ発。観光中心で、Devcon は 11/5 にふらっと。</p>
+</header>
+
+<div class="note">未確認：ETHGlobal の日付（11/6〜8 か 11/5〜7）と会場、ツアー料金、フライト時刻。予約前に公式ページで確認する。</div>
+
+<h2>地図</h2>
+<div class="tabs" id="tabs" role="group" aria-label="地図の範囲"></div>
+<div id="lmap"></div>
+<div class="sel" id="sel"></div>
+<p class="mapcap">番号をタップすると、写真と Google マップのリンク、Google マップの表示が出ます。</p>
+<ol class="list" id="list"></ol>
+
+<h2>旅程</h2>
+<div id="days" style="display:flex;flex-direction:column;gap:8px"></div>
+
+<h2>買い物と夜の遊び場</h2>
+<p class="sub">営業時間は未確認。出典は旅行ブログ中心。minta さんの希望は<a href="https://github.com/kou-uni/Mumbai-journey/issues/1" target="_blank" rel="noopener">イシュー #1</a>で確認中。</p>
+<div class="tour"><b>Colaba Causeway</b><div class="m">路上市場とカフェ。雑貨、古家具、ボリウッド土産。夕方以降が賑やか。11/1（日）向き</div>
+  <div class="links" style="margin-top:4px"><a href="https://www.google.com/maps/search/?api=1&query=Colaba+Causeway+Mumbai" target="_blank" rel="noopener">Google マップ</a></div></div>
+<div class="tour"><b>Crawford Market</b><div class="m">1869年のゴシック建築。果物・ナッツ・輸入食品。日曜休み。11/2（月）</div>
+  <div class="links" style="margin-top:4px"><a href="https://en.wikipedia.org/wiki/Crawford_Market" target="_blank" rel="noopener">写真・解説</a><a href="https://www.google.com/maps/search/?api=1&query=Crawford+Market+Mumbai" target="_blank" rel="noopener">Google マップ</a></div></div>
+<div class="tour"><b>Chor Bazaar</b><div class="m">「泥棒市場」。骨董、古いランプ、楽器</div>
+  <div class="links" style="margin-top:4px"><a href="https://www.google.com/maps/search/?api=1&query=Chor+Bazaar+Mumbai" target="_blank" rel="noopener">Google マップ</a></div></div>
+<div class="tour"><b>Linking Road（バンドラ）</b><div class="m">地元の若者向けの路上ファッション。BKC から直線 約3.5km</div>
+  <div class="links" style="margin-top:4px"><a href="https://www.google.com/maps/search/?api=1&query=Linking+Road+Bandra+Mumbai" target="_blank" rel="noopener">Google マップ</a></div></div>
+<div class="tour"><b>Jio World Drive（BKC 内のモール）</b><div class="m">17.5エーカー。屋上ドライブインシアター、週末の屋外マーケット。会場とは別の建物で、徒歩何分かは未確認</div>
+  <div class="links" style="margin-top:4px"><a href="https://www.google.com/maps/search/?api=1&query=Jio+World+Drive+BKC+Mumbai" target="_blank" rel="noopener">Google マップ</a></div></div>
+<div class="tour"><b>Phoenix Palladium（ロウワー・パレル）</b><div class="m">インド最大級のモール。延床 約31万㎡</div>
+  <div class="links" style="margin-top:4px"><a href="https://en.wikipedia.org/wiki/High_Street_Phoenix" target="_blank" rel="noopener">解説</a><a href="https://www.google.com/maps/search/?api=1&query=Phoenix+Palladium+Lower+Parel+Mumbai" target="_blank" rel="noopener">Google マップ</a></div></div>
+<div class="tour"><b>バンドラの夜（11/5）</b><div class="m">バー、ライブハウス、深夜カフェ。カーター・ロードとバンドスタンド。BKC から車で 20〜40分（概算、夜は渋滞）。BKC 周辺に歩いて行けるナイトマーケットは見つからなかった</div>
+  <div class="links" style="margin-top:4px"><a href="https://www.google.com/maps/search/?api=1&query=Carter+Road+Bandra+Mumbai" target="_blank" rel="noopener">カーター・ロード</a><a href="https://www.google.com/maps/search/?api=1&query=Bandstand+Promenade+Bandra+Mumbai" target="_blank" rel="noopener">バンドスタンド</a><a href="https://www.google.com/maps/search/?api=1&query=Kala+Ghoda+Mumbai" target="_blank" rel="noopener">カラ・ゴーダ</a><a href="https://www.google.com/maps/search/?api=1&query=Prithvi+Cafe+Juhu+Mumbai" target="_blank" rel="noopener">ジュフ</a></div></div>
+
+<h2>日帰りツアー（11/4）</h2>
+<p class="sub">ムンバイからアウランガバードまで車で片道7〜8時間。8時間のツアーはアウランガバード発の可能性が高く、国内線を別に取るか前日入りが必要。</p>
+<div class="tour">
+  <b>アジャンタ＋エローラ＋ビービー・カ・マクバラ</b>
+  <div class="m">$90・8時間・飛行機が含まれるかは未確認</div>
+  <div class="links" style="grid-column:auto;margin-top:4px">
+    <a href="https://www.expedia.com/zh/things-to-do/one-day-three-wonders-ajanta-ellora-and-mini-taj-mahal.a49960871.activity-details" target="_blank" rel="noopener">Expedia</a>
+    <a href="https://www.travelocity.com/things-to-do/day-tour-in-ajanta-and-ellora-caves-with-mini-taj-mahal.a49960871.activity-details" target="_blank" rel="noopener">Travelocity</a>
+  </div>
+</div>
+<div class="tour">
+  <b>アジャンタ＋エローラ 同日・飛行機つき</b>
+  <div class="m">約 $266・10時間・マクバラが入るかは未確認</div>
+  <div class="links" style="grid-column:auto;margin-top:4px">
+    <a href="https://www.expedia.com/things-to-do/same-day-tour-of-ajanta-ellora-caves-from-mumbai-with-flights.a49448024.activity-details" target="_blank" rel="noopener">Expedia</a>
+  </div>
+</div>
+
+<h2>遠出の候補（minta さん案）</h2>
+<div class="tour"><b>① アウランガバード1泊で石窟をじっくり（推し）</b><div class="m">11/3（火）アジャンタ → 11/4（水）エローラ。休館日を避けられる。飛行機1時間、または特急で約6時間。日帰りツアーより楽</div></div>
+<div class="tour"><b>② ウダイプール 2泊</b><div class="m">湖と宮殿の町。飛行機1時間半。例：11/1〜11/3</div></div>
+<div class="tour"><b>③ ゴア 2泊</b><div class="m">ビーチとポルトガル風の教会群。飛行機1時間</div></div>
+<p class="sub">国内線は片道 5,000〜10,000円目安。遠出先は e-Visa の「訪問予定地」にも追加する。①を選ぶと、上の 11/3 と 11/4 の旅程が変わる。</p>
+
+<h2>宿（候補）</h2>
+<p class="sub">10/31 チェックイン → 11/7 チェックアウト（7泊）。チェックインは 10/31 にする。2人1室で、1人 5,000〜8,000円が目安。価格は過去時点。</p>
+<div class="tour"><b>Treebo Olive Inn Near BKC</b><div class="m">Kurla West・$31〜51・6.4/10（102件）</div></div>
+<div class="tour"><b>FabHotel BKC Annex</b><div class="m">BKC 近く・₹1,900〜・3.7/5（393件）</div></div>
+<div class="tour"><b>FabHotel Prime Palm Grove</b><div class="m">Kurla West・₹2,300〜・3.9/5（277件）</div></div>
+<div class="tour"><b>ibis Mumbai BKC</b><div class="m">会場まで約1.1km・₹7,000前後〜（予算オーバー気味）</div></div>
+<p class="sub">予約前に確認：外国人が泊まれるか、直近の口コミ、ダブルかツインか、キャンセル無料か、深夜チェックインの連絡。</p>
+
+<h2>決めること</h2>
+<div class="tour"><div class="m">・マーケットとモールの希望（minta さんに確認中）／・遠出は①②③のどれか、なしか／・11/7 の荷物（宿に預けて取りに戻るか、会場に持ち込むか）／・ETHGlobal の日付と会場</div></div>
+
+<footer>休館日：エローラ＝火、アジャンタ＝月、エレファンタ島・カーンヘリ＝月。距離と所要時間は概算。</footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<script>
+var gm=function(la,lo){return 'https://www.google.com/maps/search/?api=1&query='+la+','+lo};
+var G=function(o){return o.q?'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(o.q):gm(o.la,o.lo)};
+var W=function(t){return 'https://en.wikipedia.org/wiki/'+t};
+var SP={
+ airport:{n:'ムンバイ空港',la:19.0896,lo:72.8656,m:'到着 10/31 23:10 ／ 出発 11/7 22:55'},
+ bkc:{n:'Jio World Centre（BKC）',la:19.0645,lo:72.8681,m:'Devcon 8 会場。宿は BKC 周辺'},
+ gateway:{n:'ゲートウェイ・オブ・インディア',la:18.9220,lo:72.8347,m:'南端コラバ。BKC から車 1〜1.5h',w:'Gateway_of_India'},
+ colaba:{n:'コラバ・コーズウェイ',la:18.9186,lo:72.8318,q:'Colaba Causeway Mumbai',m:'路上市場とカフェ。夜まで賑やか。日曜も開いている'},
+ carter:{n:'カーター・ロード（バンドラ）',la:19.0690,lo:72.8230,q:'Carter Road Bandra Mumbai',m:'海沿いの散歩道。カフェが多い。BKC から車 20〜40分（概算）'},
+ bandstand:{n:'バンドスタンド（バンドラ）',la:19.0447,lo:72.8213,q:'Bandstand Promenade Bandra Mumbai',m:'遊歩道と屋台。若者が集まる'},
+ marine:{n:'マリン・ドライブ',la:18.9440,lo:72.8231,m:'南の海沿い。夕方向き',w:'Marine_Drive,_Mumbai'},
+ csmt:{n:'CSMT 駅',la:18.9398,lo:72.8355,m:'フォート地区。ゴシック建築',w:'Chhatrapati_Shivaji_Maharaj_Terminus'},
+ crawford:{n:'クロフォード・マーケット',la:18.9473,lo:72.8340,m:'フォート地区の市場',w:'Crawford_Market'},
+ elephanta:{n:'エレファンタ島',la:18.9633,lo:72.9315,m:'ゲートウェイから船で約1h。月曜休み',w:'Elephanta_Caves'},
+ kanheri:{n:'カーンヘリ石窟',la:19.2058,lo:72.9068,m:'北の国立公園内。月曜休み',w:'Kanheri_Caves'},
+ matheran:{n:'マテラン',la:18.9867,lo:73.2672,m:'車なしの山の町。トイトレイン',w:'Matheran'},
+ alibag:{n:'アリバーグ',la:18.6414,lo:72.8722,m:'船で渡る海辺',w:'Alibag'},
+ karla:{n:'カルラ石窟',la:18.7826,lo:73.4700,m:'ロナーワラ近く。仏教石窟',w:'Karla_Caves'},
+ ellora:{n:'エローラ石窟（カイラーサナータ寺院を含む）',la:20.0258,lo:75.1780,m:'火曜休み。1つの岩から彫り出した寺院が目玉',w:'Ellora_Caves'},
+ kailasa:{n:'カイラーサナータ寺院',la:20.0268,lo:75.1792,m:'エローラの中。写真向き',w:'Kailasa_temple,_Ellora',nomap:1},
+ ajanta:{n:'アジャンタ石窟',la:20.5519,lo:75.7033,m:'壁画の仏教石窟。月曜休み',w:'Ajanta_Caves'},
+ bibi:{n:'ビービー・カ・マクバラ',la:19.9017,lo:75.3205,m:'「ミニ・タージ」。アウランガバード市内',w:'Bibi_Ka_Maqbara'}
+};
+var VIEWS=[
+ {k:'south',t:'南ムンバイ',b:[18.905,18.975,72.805,72.945],ids:['gateway','csmt','colaba','crawford','elephanta'],km:2},
+ {k:'around',t:'ムンバイ周辺',b:[18.60,19.25,72.75,73.55],ids:['airport','bkc','carter','bandstand','kanheri','alibag','matheran','karla'],km:20},
+ {k:'ellora',t:'エローラ日帰り',b:[18.85,20.70,72.60,75.90],ids:['ellora','kailasa','ajanta','bibi'],km:100,extra:[{n:'ムンバイ',la:19.0645,lo:72.8681}]}
+];
+var DAYS=[
+ {d:'10/31（土）',t:'着',h:'23:10 ムンバイ着',p:'深夜着。空港から BKC 周辺の宿へ（Uber / Ola）。',s:['airport','bkc']},
+ {d:'11/1（日）',t:'市内',h:'南ムンバイ街歩き → 夜はコラバ・コーズウェイ',p:'ゲートウェイ → CSMT 駅 → コラバ・コーズウェイ。クロフォード・マーケットは日曜休みなので入れない。',s:['gateway','csmt','colaba']},
+ {d:'11/2（月）',t:'日帰り',h:'クロフォード・マーケット → 近郊の日帰り',p:'月曜はエレファンタ島とカーンヘリが休み。近郊はアリバーグかマテラン。',s:['crawford','alibag','matheran']},
+ {d:'11/3（火）',t:'島',h:'エレファンタ島',p:'火曜は開館。ゲートウェイから船で往復。',s:['gateway','elephanta']},
+ {d:'11/4（水）',t:'日帰り',h:'エローラ（＋アジャンタ）日帰りツアー',p:'火曜休みのエローラ、月曜休みのアジャンタ、どちらも水曜は開館。',s:['ellora','ajanta','bibi']},
+ {d:'11/5（木）',t:'Devcon',h:'Devcon 8 にふらっと → 夜はバンドラ',p:'BKC。ETHGlobal の前日。夜はカーター・ロードとバンドスタンド（車で移動）。',s:['bkc','carter','bandstand']},
+ {d:'11/6（金）',t:'ハック',h:'ETHGlobal 開始（深夜は宿に戻って寝る）',p:'日付は要確認。',s:['bkc']},
+ {d:'11/7（土）',t:'帰国',h:'ハック → 18:30 に会場を出る → 22:55 発',p:'国際線は 20:00 までにチェックイン。',s:['bkc','airport']}
+];
+var NS='http://www.w3.org/2000/svg';
+function el(n,a,p){var e=document.createElementNS(NS,n);for(var k in a)e.setAttribute(k,a[k]);if(p)p.appendChild(e);return e}
+var cur=null,sel=null;
+var LM=null,LG=L.layerGroup(),MK={};
+function draw(v){
+  if(!LM){
+    LM=L.map('lmap',{scrollWheelZoom:false});
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18,attribution:'&copy; OpenStreetMap'}).addTo(LM);
+    LG.addTo(LM);
+  }
+  LG.clearLayers();MK={};
+  var n=0;
+  v.ids.forEach(function(id){
+    var o=SP[id];if(o.nomap)return;n++;
+    var ic=L.divIcon({className:'',html:'<div class="bdg" data-id="'+id+'">'+n+'</div>',iconSize:[26,26],iconAnchor:[13,13]});
+    var m=L.marker([o.la,o.lo],{icon:ic,title:o.n}).addTo(LG);
+    m.on('click',function(){pick(id)});
+    MK[id]=m;
+  });
+  LM.fitBounds([[v.b[0],v.b[2]],[v.b[1],v.b[3]]]);
+  setTimeout(function(){LM.invalidateSize()},50);
+}
+function renderList(v){
+  var html='',n=0;
+  v.ids.forEach(function(id){
+    var o=SP[id];if(!o.nomap)n++;
+    html+='<li class="item" id="it-'+id+'"><span class="num">'+(o.nomap?'・':n)+'</span><div><b>'+o.n+'</b><div class="m">'+o.m+'</div></div><div class="links">'+
+      (o.w?'<a href="'+W(o.w)+'" target="_blank" rel="noopener">写真・解説</a>':'')+
+      '<a href="'+G(o)+'" target="_blank" rel="noopener">Google マップ</a></div></li>';
+  });
+  document.getElementById('list').innerHTML=html;
+}
+function pick(id){
+  sel=id;
+  document.querySelectorAll('.bdg').forEach(function(p){p.classList.toggle('on',p.dataset.id===id)});
+  document.querySelectorAll('.item').forEach(function(i){i.classList.toggle('on',i.id==='it-'+id)});
+  var o=SP[id];
+  document.getElementById('sel').innerHTML='<b>'+o.n+'</b><div class="m">'+o.m+'</div><div class="links">'+
+    (o.w?'<a href="'+W(o.w)+'" target="_blank" rel="noopener">写真・解説</a>':'')+
+    '<a href="'+G(o)+'" target="_blank" rel="noopener">Google マップ</a></div>'+
+    '<iframe loading="lazy" title="Google マップ" src="https://www.google.com/maps?q='+encodeURIComponent(o.q||(o.la+','+o.lo))+'&output=embed"></iframe>';
+}
+function show(k){
+  cur=VIEWS.filter(function(v){return v.k===k})[0];
+  document.querySelectorAll('#tabs button').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.k===k))});
+  draw(cur);renderList(cur);
+  pick(cur.ids.filter(function(i){return !SP[i].nomap})[0]);
+}
+var tb=document.getElementById('tabs');
+VIEWS.forEach(function(v){var b=document.createElement('button');b.textContent=v.t;b.dataset.k=v.k;b.onclick=function(){show(v.k)};tb.appendChild(b)});
+var route=function(ids){
+  var c=ids.map(function(i){return SP[i].la+','+SP[i].lo});
+  var u='https://www.google.com/maps/dir/?api=1&origin='+c[0]+'&destination='+c[c.length-1];
+  if(c.length>2)u+='&waypoints='+c.slice(1,-1).join('%7C');
+  return u;
+};
+var dh='';
+DAYS.forEach(function(x){
+  dh+='<div class="day"><h3>'+x.d+'<span class="tag">'+x.t+'</span></h3><p class="h">'+x.h+'</p><p class="p">'+x.p+'</p><div class="s">'+
+   x.s.map(function(id){var o=SP[id];return '<a href="'+G(o)+'" target="_blank" rel="noopener">'+o.n+'</a>'}).join('')+(x.s.length>1?'<a href="'+route(x.s)+'" target="_blank" rel="noopener"><b>ルートを開く</b></a>':'')+'</div></div>';
+});
+document.getElementById('days').innerHTML=dh;
+show('south');
+</script>
+
+</body>
+</html>
