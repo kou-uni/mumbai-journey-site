@@ -10,15 +10,15 @@
 /* Layout: 地図を上、日ごとの旅程、観光地ガイド、ツアーの順。縦一列、スマホ前提。 */
 :root{
   --bg:#f2f5f3;--card:#ffffff;--ink:#14232a;--soft:#53656b;--line:#d6dfdc;
-  --sea:#0f5c63;--sea-soft:#dcecea;--gold:#e8890c;--gold-ink:#14232a;--map:#e6eeec;--grid:#cfdad7;
+  --hotel:#2563eb;--hotel-ink:#ffffff;--sea:#0f5c63;--sea-soft:#dcecea;--gold:#e8890c;--gold-ink:#14232a;--map:#e6eeec;--grid:#cfdad7;
   --head:"Shippori Mincho","Hiragino Mincho ProN",serif;
   --body:"Zen Kaku Gothic New","Hiragino Sans",-apple-system,sans-serif;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   --bg:#0d1a1d;--card:#15262a;--ink:#e8f0ee;--soft:#98adb1;--line:#27393d;
-  --sea:#5cc4c9;--sea-soft:#183a3d;--gold:#f2a33a;--gold-ink:#14232a;--map:#112226;--grid:#1d3236;color-scheme:dark}}
+  --hotel:#7aa8ff;--hotel-ink:#0d1a1d;--sea:#5cc4c9;--sea-soft:#183a3d;--gold:#f2a33a;--gold-ink:#14232a;--map:#112226;--grid:#1d3236;color-scheme:dark}}
 :root[data-theme="dark"]{
-  --bg:#0d1a1d;--card:#15262a;--ink:#e8f0ee;--soft:#98adb1;--line:#27393d;
+  --hotel:#7aa8ff;--hotel-ink:#0d1a1d;--bg:#0d1a1d;--card:#15262a;--ink:#e8f0ee;--soft:#98adb1;--line:#27393d;
   --sea:#5cc4c9;--sea-soft:#183a3d;--gold:#f2a33a;--gold-ink:#14232a;--map:#112226;--grid:#1d3236;color-scheme:dark}
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font:16px/1.7 var(--body);
@@ -52,6 +52,17 @@ a{color:var(--sea)}
 #lmap{height:380px;border-radius:10px;border:1px solid var(--line)}
 .bdg{width:26px;height:26px;border-radius:50%;background:var(--gold);color:var(--gold-ink);border:2px solid var(--gold-ink);display:grid;place-items:center;font:700 12px var(--body)}
 .bdg.on{background:var(--sea);color:var(--bg);border-color:var(--bg)}
+.bdg.h{background:var(--hotel);color:var(--hotel-ink);border-color:var(--hotel-ink);border-radius:8px;width:34px;font-size:11px}
+.bdg.h.on{background:var(--hotel);outline:3px solid var(--gold)}
+.arw{font-size:16px;line-height:16px;width:16px;height:16px;text-align:center;color:#d9480f;text-shadow:0 0 3px #fff}
+#groute iframe{width:100%;height:340px;border:0;border-radius:10px;margin-top:6px}
+.flow{display:flex;flex-direction:column;gap:8px}
+.fr{display:flex;flex-wrap:wrap;align-items:center;gap:4px 6px}
+.fd{font-weight:700;min-width:5.4em;font-size:.9rem}
+.chip{background:var(--sea-soft);border-radius:999px;padding:2px 10px;font-size:.85rem}
+.chip.fly{background:var(--gold);color:var(--gold-ink)}
+.ar{color:var(--soft)}
+.day .s .ar{color:var(--soft)}
 .sel iframe{width:100%;height:240px;border:0;border-radius:8px;margin-top:10px}
 .list{display:flex;flex-direction:column;gap:8px;margin:0;padding:0;list-style:none}
 .item{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 14px;display:grid;grid-template-columns:28px minmax(0,1fr);gap:4px 10px}
@@ -83,11 +94,24 @@ footer{color:var(--soft);font-size:.8rem;margin-top:20px}
 
 <div class="note">未確認：ETHGlobal の日付（11/6〜8 か 11/5〜7）と会場、ツアー料金、フライト時刻。予約前に公式ページで確認する。</div>
 
+<h2>旅程の流れ</h2>
+<div class="flow">
+<div class="fr"><span class="fd">10/31（土）</span><span class="chip">空港 23:10</span><span class="ar">→</span><span class="chip">宿</span></div>
+<div class="fr"><span class="fd">11/1（日）</span><span class="chip">コラバ・コーズウェイ</span></div>
+<div class="fr"><span class="fd">11/2（月）</span><span class="chip">Crawford Market</span><span class="ar">→</span><span class="chip">ドービー・ガート</span><span class="ar">→</span><span class="chip">ハジ・アリ廟</span></div>
+<div class="fr"><span class="fd">11/3（火）</span><span class="chip fly">✈ アウランガバード</span><span class="ar">→</span><span class="chip">アジャンタ</span><span class="ar">→</span><span class="chip">アウランガバード泊</span></div>
+<div class="fr"><span class="fd">11/4（水）</span><span class="chip">エローラ</span><span class="ar">→</span><span class="chip">マクバラ</span><span class="ar">→</span><span class="chip fly">✈ ムンバイ</span><span class="ar">→</span><span class="chip">宿</span></div>
+<div class="fr"><span class="fd">11/5（木）</span><span class="chip">Devcon（BKC）</span><span class="ar">→</span><span class="chip">バンドラの夜</span></div>
+<div class="fr"><span class="fd">11/6（金）</span><span class="chip">ETHGlobal</span></div>
+<div class="fr"><span class="fd">11/7（土）</span><span class="chip">会場 18:30</span><span class="ar">→</span><span class="chip">空港</span><span class="ar">→</span><span class="chip fly">✈ 22:55</span></div>
+</div>
+
 <h2>地図</h2>
 <div class="tabs" id="tabs" role="group" aria-label="地図の範囲"></div>
 <div id="lmap"></div>
 <div class="sel" id="sel"></div>
-<p class="mapcap">番号をタップすると、写真と Google マップのリンク、Google マップの表示が出ます。</p>
+<p class="mapcap">オレンジの丸＝観光地（番号は旅程順、点線の矢印が順路）、青の四角＝宿。番号をタップすると、写真と Google マップのリンク、Google マップの表示が出ます。</p>
+<div id="groute"></div>
 <ol class="list" id="list"></ol>
 
 <h2>旅程</h2>
@@ -148,6 +172,11 @@ var SP={
  colaba:{n:'コラバ・コーズウェイ',la:18.9186,lo:72.8318,q:'Colaba Causeway Mumbai',m:'路上市場とカフェ。夜まで賑やか。日曜も開いている'},
  dhobi:{n:'ドービー・ガート',la:18.9858,lo:72.8239,q:'Dhobi Ghat Mahalaxmi Mumbai',m:'屋外の巨大な洗濯場。橋の上から眺める'},
  hajiali:{n:'ハジ・アリ廟',la:18.9827,lo:72.8089,q:'Haji Ali Dargah Mumbai',m:'海に浮かぶ廟。干潮のときだけ参道を歩いて渡れる',w:'Haji_Ali_Dargah'},
+ h1:{n:'Treebo Olive Inn Near BKC',la:19.0715,lo:72.8766,q:'Treebo Olive Inn Near BKC Kurla West Mumbai',m:'Kurla West（LBS Marg、Fortune Arcade）。$31〜51。位置はおおよそ',hotel:1},
+ h2:{n:'FabHotel BKC Annex',la:19.0734,lo:72.8735,q:'FabHotel BKC Annex Mumbai',m:'Kapadia Nagar（CST Road）。₹1,900〜。位置はおおよそ',hotel:1},
+ h3:{n:'FabHotel Prime Palm Grove',la:19.0705,lo:72.8785,q:'FabHotel Prime Palm Grove Kurla West Mumbai',m:'LBS Marg 沿い。₹2,300〜。位置は大まか',hotel:1},
+ h4:{n:'ibis Mumbai BKC',la:19.0740,lo:72.8690,q:'ibis Mumbai BKC',m:'会場まで約1.1km。₹7,000前後〜',hotel:1},
+ abdairport:{n:'アウランガバード空港',la:19.8644,lo:75.4024,m:'11/3 朝に着、11/4 午後に発'},
  carter:{n:'カーター・ロード（バンドラ）',la:19.0690,lo:72.8230,q:'Carter Road Bandra Mumbai',m:'海沿いの散歩道。カフェが多い。BKC から車 20〜40分（概算）'},
  bandstand:{n:'バンドスタンド（バンドラ）',la:19.0447,lo:72.8213,q:'Bandstand Promenade Bandra Mumbai',m:'遊歩道と屋台。若者が集まる'},
  crawford:{n:'クロフォード・マーケット',la:18.9473,lo:72.8340,m:'フォート地区の市場',w:'Crawford_Market'},
@@ -161,9 +190,10 @@ var SP={
  bibi:{n:'ビービー・カ・マクバラ',la:19.9017,lo:75.3205,m:'「ミニ・タージ」。アウランガバード市内',w:'Bibi_Ka_Maqbara'}
 };
 var VIEWS=[
- {k:'south',t:'南ムンバイ',b:[18.905,19.000,72.795,72.865],ids:['colaba','crawford','dhobi','hajiali'],km:2},
- {k:'around',t:'ムンバイ周辺',b:[18.60,19.25,72.75,73.55],ids:['airport','bkc','carter','bandstand','kanheri','alibag','matheran','karla'],km:20},
- {k:'ellora',t:'アウランガバード',b:[18.85,20.70,72.60,75.90],ids:['ellora','kailasa','ajanta','bibi'],km:100,extra:[{n:'ムンバイ',la:19.0645,lo:72.8681}]}
+ {k:'mumbai',t:'ムンバイ（旅程順）',b:[18.90,19.10,72.79,72.90],ids:['airport','colaba','crawford','dhobi','hajiali','bkc','carter','bandstand'],route:1,gr:['airport','colaba','crawford','dhobi','hajiali','bkc','carter','bandstand']},
+ {k:'hotel',t:'宿の候補',b:[19.060,19.085,72.860,72.890],ids:['bkc','h1','h2','h3','h4']},
+ {k:'abd',t:'アウランガバード',b:[19.80,20.60,75.10,75.80],ids:['abdairport','ajanta','ellora','kailasa','bibi'],route:1,gr:['abdairport','ajanta','ellora','bibi']},
+ {k:'spare',t:'予備',b:[18.60,19.25,72.75,73.55],ids:['kanheri','alibag','matheran','karla']}
 ];
 var DAYS=[
  {d:'10/31（土）',t:'着',h:'23:10 ムンバイ着',p:'深夜着。空港から BKC 周辺の宿へ（Uber / Ola）。',s:['airport','bkc']},
@@ -179,6 +209,7 @@ var NS='http://www.w3.org/2000/svg';
 function el(n,a,p){var e=document.createElementNS(NS,n);for(var k in a)e.setAttribute(k,a[k]);if(p)p.appendChild(e);return e}
 var cur=null,sel=null;
 var LM=null,LG=L.layerGroup(),MK={};
+function bearing(a,b){var c=Math.cos((a[0]+b[0])/2*Math.PI/180);return Math.atan2((b[1]-a[1])*c,b[0]-a[0])*180/Math.PI}
 function draw(v){
   if(!LM){
     LM=L.map('lmap',{scrollWheelZoom:false});
@@ -186,22 +217,38 @@ function draw(v){
     LG.addTo(LM);
   }
   LG.clearLayers();MK={};
-  var n=0;
+  var n=0,hn=0,pts=[];
   v.ids.forEach(function(id){
-    var o=SP[id];if(o.nomap)return;n++;
-    var ic=L.divIcon({className:'',html:'<div class="bdg" data-id="'+id+'">'+n+'</div>',iconSize:[26,26],iconAnchor:[13,13]});
+    var o=SP[id];if(o.nomap)return;
+    var lab,cls='bdg',sz=[26,26];
+    if(o.hotel){hn++;lab='宿'+hn;cls='bdg h';sz=[34,26]}else{n++;lab=n;pts.push([o.la,o.lo])}
+    var ic=L.divIcon({className:'',html:'<div class="'+cls+'" data-id="'+id+'">'+lab+'</div>',iconSize:sz,iconAnchor:[sz[0]/2,13]});
     var m=L.marker([o.la,o.lo],{icon:ic,title:o.n}).addTo(LG);
     m.on('click',function(){pick(id)});
     MK[id]=m;
   });
+  if(v.route&&pts.length>1){
+    L.polyline(pts,{color:'#d9480f',weight:3,dashArray:'6 6',interactive:false}).addTo(LG);
+    for(var i=0;i<pts.length-1;i++){
+      var a=pts[i],b=pts[i+1],mid=[(a[0]+b[0])/2,(a[1]+b[1])/2];
+      L.marker(mid,{interactive:false,keyboard:false,icon:L.divIcon({className:'',html:'<div class="arw" style="transform:rotate('+bearing(a,b).toFixed(0)+'deg)">▲</div>',iconSize:[16,16],iconAnchor:[8,8]})}).addTo(LG);
+    }
+  }
   LM.fitBounds([[v.b[0],v.b[2]],[v.b[1],v.b[3]]]);
   setTimeout(function(){LM.invalidateSize()},50);
+  var gr=document.getElementById('groute');
+  if(v.gr){
+    var c=v.gr.map(function(i){return SP[i].la+','+SP[i].lo});
+    var u='https://maps.google.com/maps?saddr='+c[0]+'&daddr='+c.slice(1).join('+to:')+'&output=embed';
+    gr.innerHTML='<iframe loading="lazy" title="Google マップ（旅程順のルート）" src="'+u+'"></iframe><p class="mapcap">Google マップ：旅程順のルート（車の経路）。<a href="'+route(v.gr)+'" target="_blank" rel="noopener">Google マップで開く</a></p>';
+  }else gr.innerHTML='';
 }
 function renderList(v){
-  var html='',n=0;
+  var html='',n=0,hn=0;
   v.ids.forEach(function(id){
-    var o=SP[id];if(!o.nomap)n++;
-    html+='<li class="item" id="it-'+id+'"><span class="num">'+(o.nomap?'・':n)+'</span><div><b>'+o.n+'</b><div class="m">'+o.m+'</div></div><div class="links">'+
+    var o=SP[id],lab;
+    if(o.nomap)lab='・';else if(o.hotel){hn++;lab='宿'+hn}else{n++;lab=n}
+    html+='<li class="item" id="it-'+id+'"><span class="num"'+(o.hotel?' style="background:var(--hotel);color:var(--hotel-ink);border-radius:8px;width:34px"':'')+'>'+lab+'</span><div><b>'+o.n+'</b><div class="m">'+o.m+'</div></div><div class="links">'+
       (o.w?'<a href="'+W(o.w)+'" target="_blank" rel="noopener">写真・解説</a>':'')+
       '<a href="'+G(o)+'" target="_blank" rel="noopener">Google マップ</a></div></li>';
   });
@@ -234,10 +281,10 @@ var route=function(ids){
 var dh='';
 DAYS.forEach(function(x){
   dh+='<div class="day"><h3>'+x.d+'<span class="tag">'+x.t+'</span></h3><p class="h">'+x.h+'</p><p class="p">'+x.p+'</p><div class="s">'+
-   x.s.map(function(id){var o=SP[id];return '<a href="'+G(o)+'" target="_blank" rel="noopener">'+o.n+'</a>'}).join('')+(x.s.length>1?'<a href="'+route(x.s)+'" target="_blank" rel="noopener"><b>ルートを開く</b></a>':'')+'</div></div>';
+   x.s.map(function(id){var o=SP[id];return '<a href="'+G(o)+'" target="_blank" rel="noopener">'+o.n+'</a>'}).join('<span class="ar">→</span>')+(x.s.length>1?'<a href="'+route(x.s)+'" target="_blank" rel="noopener"><b>ルートを開く</b></a>':'')+'</div></div>';
 });
 document.getElementById('days').innerHTML=dh;
-show('south');
+show('mumbai');
 </script>
 
 </body>
